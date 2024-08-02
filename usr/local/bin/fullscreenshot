@@ -1,0 +1,4 @@
+#!/bin/sh
+
+path=$HOME/Screenshots/$(date +"%Y-%m-%d_%N").png
+scrot -p -F "$path" && xclip -sel clip -t image/png "$path"

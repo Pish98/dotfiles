@@ -1,0 +1,5 @@
+#!/bin/sh
+
+echo mem > /sys/power/state
+
+sleep 4

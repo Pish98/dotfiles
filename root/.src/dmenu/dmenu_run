@@ -1,0 +1,2 @@
+#!/bin/sh
+cat ~/.src/dmenu/list | dmenu "$@" | ${SHELL:-"/bin/sh"} &
