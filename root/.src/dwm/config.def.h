@@ -4,9 +4,9 @@ static const unsigned int snap      = 32;       /* snap pixel */
 static const int showbar            = 0;        /* 0 means no bar */
 static const int topbar             = 1;        /* 0 means bottom bar */
 static const char *fonts[]          = { "Dejavu Sans Mono:size=12" };
-static const char white[]       = "#FFFFFF";
-static const char black[]       = "#000000";
-static const char red[]        = "#bf616a";
+static const char white[]           = "#FFFFFF";
+static const char black[]           = "#000000";
+static const char red[]             = "#bf616a";
 static const char *colors[][3]      = {
 	/*               fg         bg         border   */
 	[SchemeNorm] = { white, black, black },
@@ -22,7 +22,7 @@ static const Rule rules[] = {
 	 *	WM_NAME(STRING) = title
 	 */
 	/* class      instance    title       tags mask     isfloating   monitor */
-	{ NULL,  NULL,       NULL,       NULL,       NULL,           -1 },
+  { NULL,       NULL,       NULL,       0,            False,       -1 }
 };
 
 /* layout(s) */
@@ -59,8 +59,8 @@ static const char *termcmd[]  = { "sh", "-c", CHLANG "$TERMINAL", NULL };
 static const Key keys[] = {
 	/* modifier                     key        function        argument */
 	/* Start Application */
-	{ MODKEY,                       XK_d,      spawn,          {.v = dmenucmd}},
-	{ MODKEY,    		                XK_Return, spawn,          {.v = termcmd } },
+	{ MODKEY,                       XK_d,       spawn,          {.v = dmenucmd}},
+	{ MODKEY,    		                XK_Return,  spawn,          {.v = termcmd } },
 	{ MODKEY,                       XK_p,       spawn,          CHCMD("$TERMINAL pulsemixer")},
 
 	/* Light */
