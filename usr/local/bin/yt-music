@@ -1,0 +1,3 @@
+#!/bin/sh
+
+yt-dlp -f "ba" -x --embed-metadata --embed-thumbnail -o "%(title)s.%(ext)s" "$@"

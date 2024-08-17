@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# Example: mergeaudio input.mkv output.mp4
+
+INPUTS_COUNT=$(ffprobe -v error -select_streams a -show_entries stream=index -of csv=p=0 "$1" | wc -l)
+
+FFMPEG_OPTIONS=""
+
+[ "$INPUTS_COUNT" != "0" ] && FFMPEG_OPTIONS="-filter_complex amix=inputs=$INPUTS_COUNT:duration=longest"
+
+ffmpeg \
+  -i "$1" \
+  -c:v copy \
+  $FFMPEG_OPTIONS \
+  "$2"

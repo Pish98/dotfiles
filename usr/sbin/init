@@ -1,9 +1,9 @@
 #!/bin/sh
 
 # filesystems
-mount -vt efivarfs efivarfs /sys/firmware/efi/efivars -o rw,relatime
-mount -t vfat /dev/nvme0n1p1 /boot -o noatime
 mount -o remount,noatime /
+mount -vt efivarfs efivarfs /sys/firmware/efi/efivars -o rw,relatime
+mount /dev/nvme0n1p1 /boot
 swapon /swapfile
 
 # udevd
@@ -19,18 +19,18 @@ dbus-daemon --system --fork --nopidfile
 # network
 echo localhost > /proc/sys/kernel/hostname
 dhcpcd
-/usr/libexec/iwd &> /dev/null &
+/usr/libexec/iwd >/dev/null 2>/dev/null &
 ip a add 127.0.0.1/8 dev lo
 ip link set dev lo up
 
 # bluetooth
-/usr/libexec/bluetooth/bluetoothd &> /dev/null &
+/usr/libexec/bluetooth/bluetoothd >/dev/null 2>/dev/null &
 
 # ttys
 for i in $(seq 1 12); do
-	while :; do
-		setsid -c su - root <> /dev/tty$i >&0 2>&1
-	done &
+  while :; do
+    setsid -c su - root <> /dev/tty$i >&0 2>&1
+  done &
 done
 
 # init communication
@@ -40,26 +40,34 @@ mkfifo /run/init/communication
 while :; do
   CMD=`cat /run/init/communication`
 
-  if [[ "$CMD" == "poweroff" || "$CMD" == "reboot" ]]; then
-    kill -s TERM -1
-    sleep 1
-    kill -s KILL -1
+  case "$CMD" in
+    "reboot" | "poweroff")
+      pkill --inverse -f login -15
+      sleep 1
+      pkill --inverse -f login -9
 
-    sync
+      sync
 
-    for i in /media/* /mnt/* /boot; do
-      timeout 1 umount -R "$i"
-    done
+      timeout 1 umount -alt nfs
+      timeout 1 umount -alt nfs4
+      swapoff /swapfile
 
-    swapoff /swapfile
-    mount -o remount,ro /
+      for i in /dev/sd?; do
+        hd-idle -t $(basename "$i")
+      done
 
-    for i in /dev/sd?; do
-      hd-idle -t $(basename "$i")
-    done
+      timeout 2 umount -a
+      ;;
+  esac
 
-    umount -R /dev /sys /run
-  fi
-  [[ "$CMD" == "poweroff" ]] && echo o > /proc/sysrq-trigger
-  [[ "$CMD" == "reboot"   ]] && echo b > /proc/sysrq-trigger
-done &> /dev/null
+  case "$CMD" in
+    "reboot")
+        echo b > /proc/sysrq-trigger
+        cat
+        ;;
+      "poweroff")
+        echo o > /proc/sysrq-trigger
+        cat
+      ;;
+  esac
+done >/dev/null 2>/dev/null

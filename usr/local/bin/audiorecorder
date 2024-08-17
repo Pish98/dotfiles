@@ -1,0 +1,25 @@
+#!/bin/sh
+
+path=$(date +"%Y-%m-%d_%N").mkv
+
+echo Select audio sources by id or name. Separate by spaces
+pactl list sources short
+read -p "Sources: " sources
+
+FFMPEG_SOURCES=""
+FFMPEG_MAP=""
+MAP=0
+
+for i in $sources; do
+  FFMPEG_MAP="$FFMPEG_MAP -map $MAP"
+  FFMPEG_SOURCES="$FFMPEG_SOURCES -f pulse -i $i"
+  MAP=$(($MAP+1))
+done
+
+ffmpeg -y \
+    $FFMPEG_SOURCES \
+    $FFMPEG_MAP \
+    -acodec aac \
+    "$path"
+
+echo Saved to $path
